@@ -4,7 +4,7 @@ import sqlite3
 
 pygame.init()
 
-WIDTH, HEIGHT = 600, 500
+WIDTH, HEIGHT = 1066, 600
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Платформер')
 
@@ -20,16 +20,16 @@ SELECTED = (200, 200, 0)
 
 font = pygame.font.Font('fonts/PressStart2P-Regular.ttf', 14)
 
-background_image = pygame.image.load('img/blue_bg.png')
+background_image = pygame.image.load('images/for_levels/background/background2.png')
 background_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT))
 
 character_id = 0
-character1_image = pygame.image.load('img/character1.png')
-character2_image = pygame.image.load('img/character2.png')
-character3_image = pygame.image.load('img/character3.png')
-character1_image = pygame.transform.scale(character1_image, (100, 100))
-character2_image = pygame.transform.scale(character2_image, (100, 100))
-character3_image = pygame.transform.scale(character3_image, (100, 100))
+character1_image = pygame.image.load('images/character/character1/idle/Idle_1.png')
+character2_image = pygame.image.load('images/character/character2/idle/Idle_1.png')
+character3_image = pygame.image.load('images/character/character3/idle/Idle_1.png')
+character1_image = pygame.transform.scale(character1_image, (200, 200))
+character2_image = pygame.transform.scale(character2_image, (200, 200))
+character3_image = pygame.transform.scale(character3_image, (200, 200))
 
 # Функция для подключения к базе данных
 def connect_db():
@@ -49,8 +49,8 @@ def get_all_users():
 def draw_main_screen():
     screen.blit(background_image, (0, 0))
 
-    login_button = pygame.Rect(200, 170, 200, 60)
-    register_button = pygame.Rect(200, 270, 200, 60)
+    login_button = pygame.Rect(450, 200, 200, 60)
+    register_button = pygame.Rect(450, 300, 200, 60)
 
     pygame.draw.rect(screen, (0, 0, 0), login_button)
     pygame.draw.rect(screen, (0, 0, 0), register_button)
@@ -63,23 +63,26 @@ def draw_main_screen():
     pygame.display.flip()
 
 # экран входа
-# экран входа
 def draw_login_screen():
     screen.fill(BLACK)
+    back_button = pygame.Rect(5, 5, 100, 30)
+    pygame.draw.rect(screen, BLACK, back_button)
+    back_button_text = font.render('← Назад', True, WHITE)
+    screen.blit(back_button_text, (back_button.x + 5, back_button.y + 5))
+
     login_title = font.render('Вход', True, WHITE)
-    screen.blit(login_title, (WIDTH // 3 + 40, HEIGHT // 10))
+    screen.blit(login_title, (500, 10))
 
     # Отображение списка пользователей с кнопками "Играть"
     users = get_all_users()
-    user_list_start_y = 150  # Начальная позиция для списка пользователей
+    user_list_start_y = 150
     for idx, user in enumerate(users):
-        # Убедимся, что user является строкой
         if user:
-            user_text = font.render(str(user), True, WHITE)  # Преобразуем user в строку
-            screen.blit(user_text, (100, user_list_start_y + idx * 30))
+            user_text = font.render(str(user), True, WHITE)
+            screen.blit(user_text, (100, user_list_start_y + idx * 40))
 
-            # Кнопка "Играть" рядом с каждым пользователем
-            play_button = pygame.Rect(300, user_list_start_y + idx * 30, 100, 25)
+            # Кнопка "Играть"
+            play_button = pygame.Rect(300, user_list_start_y + idx * 40, 100, 25)
             pygame.draw.rect(screen, GREEN, play_button)
             play_button_text = font.render('Играть', True, WHITE)
             screen.blit(play_button_text, (play_button.x + 15, play_button.y + 5))
@@ -90,22 +93,28 @@ def draw_login_screen():
 # экран регистрации
 def draw_register_screen(username_text, character_id):
     screen.fill(BLACK)
+
+    back_button = pygame.Rect(5, 5, 100, 30)
+    pygame.draw.rect(screen, BLACK, back_button)
+    back_button_text = font.render('← Назад', True, WHITE)
+    screen.blit(back_button_text, (back_button.x + 5, back_button.y + 5))
+
     register_title = font.render('Регистрация', True, WHITE)
-    screen.blit(register_title, (WIDTH // 3.5, 10))
+    screen.blit(register_title, (470, 10))
 
     # Поле имени пользователя
-    username_box = pygame.Rect(80, 50, 500, 30)
+    username_box = pygame.Rect(80, 70, 950, 30)
     pygame.draw.rect(screen, WHITE, username_box, 2)
     username_input = font.render(f'Имя: {username_text}', True, WHITE)
     screen.blit(username_input, (username_box.x - 55, username_box.y + 6))
 
-    screen.blit(character1_image, (100, 120))  # Персонаж 1
-    screen.blit(character2_image, (250, 120))  # Персонаж 2
-    screen.blit(character3_image, (400, 120))  # Персонаж 3
+    screen.blit(character1_image, (200, 120))  # Персонаж 1
+    screen.blit(character2_image, (450, 120))  # Персонаж 2
+    screen.blit(character3_image, (700, 120))  # Персонаж 3
 
-    button1 = pygame.Rect(100, 230, 100, 30)
-    button2 = pygame.Rect(250, 230, 100, 30)
-    button3 = pygame.Rect(400, 230, 100, 30)
+    button1 = pygame.Rect(200, 330, 150, 40)
+    button2 = pygame.Rect(450, 330, 150, 40)
+    button3 = pygame.Rect(700, 330, 150, 40)
 
     # Изменение цвета кнопок в зависимости от выбранного персонажа
     button1_color = SELECTED if character_id == 1 else GREY
@@ -120,15 +129,15 @@ def draw_register_screen(username_text, character_id):
     button2_text = font.render('Выбрать', True, WHITE)
     button3_text = font.render('Выбрать', True, WHITE)
 
-    screen.blit(button1_text, (button1.x + 2, button1.y + 5))
-    screen.blit(button2_text, (button2.x + 2, button2.y + 5))
-    screen.blit(button3_text, (button3.x + 2, button3.y + 5))
+    screen.blit(button1_text, (button1.x + 27, button1.y + 11))
+    screen.blit(button2_text, (button2.x + 27, button2.y + 11))
+    screen.blit(button3_text, (button3.x + 27, button3.y + 11))
 
     # Кнопка регистрации
-    register_button = pygame.Rect(100, 400, 250, 50)
+    register_button = pygame.Rect(390, 500, 270, 50)
     pygame.draw.rect(screen, GREEN, register_button)
     register_button_text = font.render('Зарегистрироваться', True, WHITE)
-    screen.blit(register_button_text, (register_button.x, register_button.y + 15))
+    screen.blit(register_button_text, (register_button.x + 10, register_button.y + 15))
 
     pygame.display.flip()
 
@@ -157,8 +166,8 @@ def main():
                 mouse_pos = event.pos
 
                 if current_screen == 'main':
-                    login_button = pygame.Rect(200, 170, 200, 60)
-                    register_button = pygame.Rect(200, 270, 200, 60)
+                    login_button = pygame.Rect(450, 200, 200, 60)
+                    register_button = pygame.Rect(450, 300, 200, 60)
 
                     if login_button.collidepoint(mouse_pos):
                         current_screen = 'login'
@@ -166,6 +175,11 @@ def main():
                         current_screen = 'register'
 
                 if current_screen == 'login':
+                    back_button = pygame.Rect(5, 5, 100, 30)
+
+                    if back_button.collidepoint(mouse_pos):
+                        current_screen = 'main'
+
                     users = get_all_users()
                     user_list_start_y = 150  # Начальная позиция для списка пользователей
                     for idx, user in enumerate(users):
@@ -175,12 +189,17 @@ def main():
                             current_screen = 'main'  # Переход на главный экран
 
                 if current_screen == 'register':
-                    username_box = pygame.Rect(80, 50, 500, 30)
-                    register_button = pygame.Rect(100, 400, 250, 50)
+                    username_box = pygame.Rect(80, 70, 950, 30)
+                    register_button = pygame.Rect(390, 500, 270, 50)
 
-                    button1 = pygame.Rect(100, 230, 100, 30)
-                    button2 = pygame.Rect(250, 230, 100, 30)
-                    button3 = pygame.Rect(400, 230, 100, 30)
+                    button1 = pygame.Rect(200, 330, 150, 40)
+                    button2 = pygame.Rect(450, 330, 150, 40)
+                    button3 = pygame.Rect(700, 330, 150, 40)
+
+                    back_button = pygame.Rect(5, 5, 100, 30)
+
+                    if back_button.collidepoint(mouse_pos):
+                        current_screen = 'main'
 
                     if button1.collidepoint(mouse_pos):
                         if username_text:
