@@ -186,7 +186,7 @@ def main():
                         play_button = pygame.Rect(300, user_list_start_y + idx * 30, 100, 25)
                         if play_button.collidepoint(mouse_pos):
                             print(f"Игрок {user} выбрал 'Играть'")
-                            current_screen = 'main'  # Переход на главный экран
+                            current_screen = 'main'
 
                 if current_screen == 'register':
                     username_box = pygame.Rect(80, 70, 950, 30)
@@ -221,7 +221,8 @@ def main():
                             print(f"Пользователь {username_text} зарегистрирован с персонажем {character_id}")
                             username_text = ''
                             character_id = 0  # Сбросим выбор персонажа после регистрации
-                            current_screen = 'main'  # Вернуться на главный экран
+                            current_screen = 'main'
+
                     else:
                         active_input = None
 
@@ -230,12 +231,13 @@ def main():
                     if event.key == pygame.K_BACKSPACE:
                         username_text = username_text[:-1]
                     elif event.key == pygame.K_RETURN:
-                        if username_text and character_id != 0:  # Регистрируем только если выбран персонаж
+                        if username_text and character_id != 0:
                             register_user(username_text, character_id)
                             print(f"Пользователь {username_text} зарегистрирован!")
                             username_text = ''
                             character_id = 0
                             current_screen = 'main'
+
                     else:
                         username_text += event.unicode
 
