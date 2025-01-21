@@ -31,7 +31,6 @@ character1_image = pygame.transform.scale(character1_image, (200, 200))
 character2_image = pygame.transform.scale(character2_image, (200, 200))
 character3_image = pygame.transform.scale(character3_image, (200, 200))
 
-# Функция для подключения к базе данных
 def connect_db():
     conn = sqlite3.connect('game.sqlite')
     return conn
@@ -40,10 +39,11 @@ def connect_db():
 def get_all_users():
     conn = connect_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT username FROM user")
+    cursor.execute("SELECT username, character_id FROM user")
     users = cursor.fetchall()
     conn.close()
-    return [user[0] for user in users]
+    return users
+
 
 # главный экран
 def draw_main_screen():
@@ -61,6 +61,7 @@ def draw_main_screen():
     screen.blit(register_text, (register_button.x + 26, register_button.y + 20))
 
     pygame.display.flip()
+
 # экран входа
 def draw_login_screen():
     screen.fill(BLACK)
@@ -75,18 +76,18 @@ def draw_login_screen():
     # Отображение списка пользователей с кнопками "Играть"
     users = get_all_users()
     user_list_start_y = 150
-    for idx, user in enumerate(users):
-        if user:
-            user_text = font.render(str(user), True, WHITE)
+    for idx, (username, _) in enumerate(users):
+        if username:
+            user_text = font.render(str(username), True, WHITE)
             screen.blit(user_text, (100, user_list_start_y + idx * 40))
 
-            # Кнопка "Играть"
             play_button = pygame.Rect(300, user_list_start_y + idx * 40, 100, 25)
             pygame.draw.rect(screen, GREEN, play_button)
             play_button_text = font.render('Играть', True, WHITE)
             screen.blit(play_button_text, (play_button.x + 15, play_button.y + 5))
 
     pygame.display.flip()
+
 
 
 def draw_game_scene(character_id):
@@ -136,7 +137,6 @@ def draw_game_scene(character_id):
     player = pygame.sprite.Group()
     coords_platform = []
 
-    # Вызов функции create_background
     def create_background(level):
         background.empty()
         screen.blit(game_scene_image, (0, 0))
@@ -208,11 +208,10 @@ def draw_game_scene(character_id):
         except Exception:
             pass
 
-    # Инициализация уровня
     create_background(1)
 
     running = True
-    speed = 100  # pixels per second
+    # speed = 100
     jump_height = 9
     fps = 60
     clock = pygame.time.Clock()
@@ -329,15 +328,15 @@ def draw_register_screen(username_text, character_id):
     username_input = font.render(f'Имя: {username_text}', True, WHITE)
     screen.blit(username_input, (username_box.x - 55, username_box.y + 6))
 
-    screen.blit(character1_image, (200, 120))  # Персонаж 1
-    screen.blit(character2_image, (450, 120))  # Персонаж 2
-    screen.blit(character3_image, (700, 120))  # Персонаж 3
+    screen.blit(character1_image, (200, 120))
+    screen.blit(character2_image, (450, 120))
+    screen.blit(character3_image, (700, 120))
 
     button1 = pygame.Rect(200, 330, 150, 40)
     button2 = pygame.Rect(450, 330, 150, 40)
     button3 = pygame.Rect(700, 330, 150, 40)
 
-    # Изменение цвета кнопок в зависимости от выбранного персонажа
+    # цвет кнопок
     button1_color = SELECTED if character_id == 1 else GREY
     button2_color = SELECTED if character_id == 2 else GREY
     button3_color = SELECTED if character_id == 3 else GREY
@@ -362,7 +361,7 @@ def draw_register_screen(username_text, character_id):
 
     pygame.display.flip()
 
-# Функция для добавления пользователя в базу данных
+# добавление пользователя в бд
 def register_user(username, character_id):
     conn = connect_db()
     cursor = conn.cursor()
@@ -374,7 +373,7 @@ def main():
     clock = pygame.time.Clock()
     current_screen = 'main'
     username_text = ''
-    character_id = 0  # Изначально персонаж не выбран
+    character_id = 0
     active_input = None  # 'username'
 
     while True:
@@ -403,12 +402,10 @@ def main():
 
                     users = get_all_users()
                     user_list_start_y = 150
-                    for idx, user in enumerate(users):
-                        play_button = pygame.Rect(300, user_list_start_y + idx * 30, 100, 25)
+                    for idx, (username, char_id) in enumerate(users):
+                        play_button = pygame.Rect(300, user_list_start_y + idx * 40, 100, 25)
                         if play_button.collidepoint(mouse_pos):
-                            #/////////////////////
-                            character_id = 1
-                            #////////////////////
+                            character_id = char_id
                             current_screen = 'game_scene'
 
                 if current_screen == 'register':
