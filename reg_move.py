@@ -61,7 +61,6 @@ def draw_main_screen():
     screen.blit(register_text, (register_button.x + 26, register_button.y + 20))
 
     pygame.display.flip()
-
 # экран входа
 def draw_login_screen():
     screen.fill(BLACK)
@@ -89,7 +88,7 @@ def draw_login_screen():
 
     pygame.display.flip()
 
-# экран игры
+
 def draw_game_scene(character_id):
     game_scene_image = pygame.image.load('images/for_levels/background/background1.png')
     game_scene_image = pygame.transform.scale(game_scene_image, (WIDTH, HEIGHT))
@@ -97,7 +96,6 @@ def draw_game_scene(character_id):
 
     coin_png = pygame.image.load('images/for_levels/coin.png').convert_alpha()
     platform_png = pygame.image.load('images/for_levels/platform.png').convert_alpha()
-
 
     animations = {'attack': 0, 'death': 1, 'fallattack': 2, 'hurt': 3, 'idle': 4, 'jump': 5,
                   'jumpattack': 6, 'run': 7, 'runattack': 8, 'squat': 9, 'walk': 10, 'walkattack': 11}
@@ -138,6 +136,7 @@ def draw_game_scene(character_id):
     player = pygame.sprite.Group()
     coords_platform = []
 
+    # Вызов функции create_background
     def create_background(level):
         background.empty()
         screen.blit(game_scene_image, (0, 0))
@@ -191,7 +190,7 @@ def draw_game_scene(character_id):
             background.add(platform)
             coords_platform.append((420, 540))
 
-            background.draw(screen)
+        background.draw(screen)
 
     def change_player(group, animation, stage, x, y, inversion=0):
         try:
@@ -209,7 +208,9 @@ def draw_game_scene(character_id):
         except Exception:
             pass
 
+    # Инициализация уровня
     create_background(1)
+
     running = True
     speed = 100  # pixels per second
     jump_height = 9
@@ -227,13 +228,90 @@ def draw_game_scene(character_id):
     change_player(player, animation, 0, player_x, player_y)
     player.draw(screen)
 
-    # ///////////////////////////////////////////////////////
+    while running:
+        events = pygame.key.get_pressed()
+        if not is_jump:
+            if events[pygame.K_UP]:
+                is_jump = True
+                jump_height = 9
+                animation = 'jump'
+                stage = 0
+                count_events += 1
+        else:
+            stage = (stage + 0.25) % len(characters[0][animations[animation]])
+            animation = 'jump'
+            if jump_height >= -9:
+                if jump_height > 0:
+                    player_y -= (jump_height ** 2) / 2
+                else:
+                    player_y += (jump_height ** 2) / 2
+                jump_height -= 1
+            else:
+                is_jump = False
+            is_update = True
 
-    # //////////////////////////////////////////////////////
+        if events[pygame.K_DOWN]:
+            pass
 
-    pygame.display.flip()
+        if events[pygame.K_RIGHT]:
+            count_events += 1
+            if not is_jump:
+                animation = 'walk'
+                stage = (stage + 0.25) % len(characters[0][animations[animation]])
+            if is_right:
+                is_inversion = False
+            else:
+                is_inversion = True
+            player_x += 8
+            is_right = True
+            is_update = True
 
-# экран регистрации
+        if events[pygame.K_LEFT]:
+            count_events += 1
+            if not is_jump:
+                animation = 'walk'
+                stage = (stage + 0.25) % len(characters[0][animations[animation]])
+            if is_right:
+                is_inversion = True
+            else:
+                is_inversion = False
+            player_x -= 8
+            is_right = False
+            is_update = True
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+        if is_update:
+            intersection = False
+            intersection2 = False
+            create_background(level)
+            old_x, old_y = 0, 528
+            for player_mask in player:
+                old_x, old_y = player_mask.rect.x, player_mask.rect.y
+            change_player(player, animation, int(stage), player_x, player_y, is_inversion)
+            is_inversion = False
+            for el in background:
+                for player_mask in player:
+                    if pygame.sprite.collide_mask(player_mask, el):
+                        intersection = True
+            change_player(player, animation, int(stage), player_x, player_y, is_inversion)
+            if intersection:
+                player_x, player_y = old_x, old_y
+                intersection = False
+            change_player(player, animation, int(stage), player_x, player_y, is_inversion)
+            if (count_events == 0) and not is_jump:
+                animation = 'idle'
+                stage = (stage + 0.15) % 3
+            player.draw(screen)
+            count_events = 0
+        pygame.display.flip()
+        clock.tick(fps)
+    pygame.quit()
+
+
+
 def draw_register_screen(username_text, character_id):
     screen.fill(BLACK)
 
