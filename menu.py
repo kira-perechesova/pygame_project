@@ -24,7 +24,7 @@ background_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT))
 
 
 
-def draw_menu():
+def draw_menu() -> {str: pygame.Rect}:
     screen.blit(background_image, (0, 0))
 
     caption = pygame.Rect(450, 50, 200, 60)
@@ -36,13 +36,13 @@ def draw_menu():
     filenames = next(walk("levels"), (None, None, []))[2]
     print(filenames)
 
-    buttons = []
+    buttons = {}
     for i in range(len(filenames)):
         x = (i % 6) * 100 + 100
         y = (i// 6) * 100 + 150
         button = pygame.Rect(x, y, 100, 100)
         pygame.draw.rect(screen, BLACK, button)
-        buttons.append(button)
+        buttons[filenames[i]] = button
         button_text = font.render(filenames[i].rstrip(".json"), True, WHITE)
         screen.blit(button_text, (x + 40, y + 40))
 
@@ -51,7 +51,7 @@ def draw_menu():
 
 def menu(id):
     clock = pygame.time.Clock()
-    buttons = draw_menu()
+    buttons: {str: pygame.Rect} = draw_menu()
     while True:
 
         for event in pygame.event.get():
@@ -59,10 +59,10 @@ def menu(id):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            for i in buttons:
+            for key, value in buttons:
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    if i.collidepoint(mouse_pos):
-                        draw_game_scene(id)
+                    if value.collidepoint(mouse_pos):
+                        draw_game_scene(id, key)
 
 
 

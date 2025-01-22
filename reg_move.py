@@ -2,6 +2,7 @@ import pygame
 import sys
 import sqlite3
 from menu import *
+import json
 
 pygame.init()
 
@@ -91,7 +92,7 @@ def draw_login_screen():
 
 
 
-def draw_game_scene(character_id):
+def draw_game_scene(character_id, level_id):
     game_scene_image = pygame.image.load('images/for_levels/background/background1.png')
     game_scene_image = pygame.transform.scale(game_scene_image, (WIDTH, HEIGHT))
     screen.blit(game_scene_image, (0, 0))
@@ -143,6 +144,11 @@ def draw_game_scene(character_id):
         screen.blit(game_scene_image, (0, 0))
         coords_platform.clear()
 
+        f = open(f"levels/{level}")
+
+        data = json.load(f)
+
+
         if level == 1:
             k = 0
             for i in range(15):
@@ -191,6 +197,7 @@ def draw_game_scene(character_id):
             background.add(platform)
             coords_platform.append((420, 540))
 
+        f.close()
         background.draw(screen)
 
     def change_player(group, animation, stage, x, y, inversion=0):
@@ -209,7 +216,7 @@ def draw_game_scene(character_id):
         except Exception:
             pass
 
-    create_background(1)
+    create_background(level_id)
 
     running = True
     # speed = 100
