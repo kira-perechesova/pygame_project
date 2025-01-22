@@ -1,6 +1,7 @@
 import pygame
 import sys
 import sqlite3
+from menu import *
 
 pygame.init()
 
@@ -460,7 +461,7 @@ def main():
         elif current_screen == 'register':
             draw_register_screen(username_text, character_id)
         elif current_screen == 'game_scene':
-            draw_game_scene(character_id)
+            menu(character_id)
 
         clock.tick(30)
 
