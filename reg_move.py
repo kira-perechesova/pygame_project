@@ -218,7 +218,7 @@ def draw_game_scene(character_id, level_id):
     create_background(level_id)
 
     running = True
-    # speed = 100
+    falling_speed = 6
     jump_height = 9
     fps = 60
     clock = pygame.time.Clock()
@@ -226,6 +226,7 @@ def draw_game_scene(character_id, level_id):
     is_update = True
     is_jump = False
     is_inversion = False
+    is_shift = False
     is_right = True
     animation = 'idle'
     stage = 0
@@ -237,7 +238,7 @@ def draw_game_scene(character_id, level_id):
     while running:
         events = pygame.key.get_pressed()
         if not is_jump:
-            if events[pygame.K_UP]:
+            if events[pygame.K_UP] or events[pygame.K_SPACE] or events[pygame.K_w]:
                 is_jump = True
                 jump_height = 9
                 animation = 'jump'
@@ -259,29 +260,52 @@ def draw_game_scene(character_id, level_id):
         if events[pygame.K_DOWN]:
             pass
 
-        if events[pygame.K_RIGHT]:
+        if events[pygame.K_LSHIFT] or events[pygame.K_RSHIFT]:
+            is_shift = True
+        else:
+            is_shift = False
+
+        if events[pygame.K_RIGHT] or events[pygame.K_d]:
             count_events += 1
             if not is_jump:
-                animation = 'walk'
+                if is_shift:
+                    animation = 'run'
+                    player_x += 7
+                else:
+                    animation = 'walk'
+                    player_x += 4
                 stage = (stage + 0.25) % len(characters[0][animations[animation]])
+            else:
+                if is_shift:
+                    player_x += 7
+                else:
+                    player_x += 4
             if is_right:
                 is_inversion = False
             else:
                 is_inversion = True
-            player_x += 8
             is_right = True
             is_update = True
 
-        if events[pygame.K_LEFT]:
+        if events[pygame.K_LEFT] or events[pygame.K_a]:
             count_events += 1
             if not is_jump:
-                animation = 'walk'
+                if is_shift:
+                    animation = 'run'
+                    player_x -= 7
+                else:
+                    animation = 'walk'
+                    player_x -= 4
                 stage = (stage + 0.25) % len(characters[0][animations[animation]])
+            else:
+                if is_shift:
+                    player_x -= 7
+                else:
+                    player_x -= 4
             if is_right:
                 is_inversion = True
             else:
                 is_inversion = False
-            player_x -= 8
             is_right = False
             is_update = True
 
@@ -295,18 +319,43 @@ def draw_game_scene(character_id, level_id):
             intersection2 = False
             create_background(level)
             old_x, old_y = 0, 528
+            el_y = 0
             for player_mask in player:
                 old_x, old_y = player_mask.rect.x, player_mask.rect.y
             change_player(player, animation, int(stage), player_x, player_y, is_inversion)
             is_inversion = False
             for el in background:
                 for player_mask in player:
-                    if pygame.sprite.collide_mask(player_mask, el):
+                    if pygame.sprite.collide_mask(el, player_mask):
                         intersection = True
             change_player(player, animation, int(stage), player_x, player_y, is_inversion)
             if intersection:
                 player_x, player_y = old_x, old_y
-                intersection = False
+            change_player(player, animation, int(stage), player_x, player_y, is_inversion)
+            for el in background:
+                for player_mask in player:
+                    if pygame.sprite.collide_mask(el, player_mask):
+                        if pygame.sprite.collide_mask(el, player_mask)[1] < 2:
+                            el_y = el.rect.y - 42
+                        else:
+                            el_y = player_y
+                        intersection2 = True
+            if intersection2:
+                player_y = el_y
+            else:
+                player_y += falling_speed
+                intersection2 = False
+                change_player(player, animation, int(stage), player_x, player_y, is_inversion)
+                for el in background:
+                    for player_mask in player:
+                        if pygame.sprite.collide_mask(el, player_mask):
+                            if pygame.sprite.collide_mask(el, player_mask)[1] < 2:
+                                el_y = el.rect.y - 42
+                            else:
+                                el_y = player_y
+                            intersection2 = True
+                if intersection2:
+                    player_y = el_y
             change_player(player, animation, int(stage), player_x, player_y, is_inversion)
             if (count_events == 0) and not is_jump:
                 animation = 'idle'
