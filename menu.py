@@ -3,7 +3,6 @@ import sys
 from os import walk
 from reg_move import draw_game_scene
 
-
 pygame.init()
 
 WIDTH, HEIGHT = 1066, 600
@@ -23,7 +22,6 @@ background_image = pygame.image.load('images/for_levels/background/background2.p
 background_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT))
 
 
-
 def draw_menu() -> {str: pygame.Rect}:
     screen.blit(background_image, (0, 0))
 
@@ -36,10 +34,10 @@ def draw_menu() -> {str: pygame.Rect}:
     filenames = next(walk("levels"), (None, None, []))[2]
     print(filenames)
 
-    buttons = {}
+    buttons = dict()
     for i in range(len(filenames)):
         x = (i % 6) * 100 + 100
-        y = (i// 6) * 100 + 150
+        y = (i // 6) * 100 + 150
         button = pygame.Rect(x, y, 100, 100)
         pygame.draw.rect(screen, BLACK, button)
         buttons[filenames[i]] = button
@@ -49,26 +47,25 @@ def draw_menu() -> {str: pygame.Rect}:
     pygame.display.flip()
     return buttons
 
+
 def menu(id):
     clock = pygame.time.Clock()
     buttons: {str: pygame.Rect} = draw_menu()
     while True:
 
         for event in pygame.event.get():
-            mouse_pos = event.pos
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            for key, value in buttons:
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if value.collidepoint(mouse_pos):
-                        draw_game_scene(id, key)
-
-
-
-
+            if buttons is dict:
+                for key, value in buttons:
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        mouse_pos = event.pos
+                        if value.collidepoint(mouse_pos):
+                            draw_game_scene(id, key)
 
         clock.tick(30)
+
 
 if __name__ == '__main__':
     menu(1)
