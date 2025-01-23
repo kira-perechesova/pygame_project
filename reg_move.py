@@ -360,6 +360,10 @@ def draw_game_scene(character_id, level_id):
             if (count_events == 0) and not is_jump:
                 animation = 'idle'
                 stage = (stage + 0.15) % 3
+            if player_y >= 624:
+                player_x, player_y = 0, 528
+                stage = 0
+                change_player(player, animation, int(stage), player_x, player_y, is_inversion)
             player.draw(screen)
             count_events = 0
         pygame.display.flip()
