@@ -32,7 +32,6 @@ def draw_menu() -> {str: pygame.Rect}:
     caption_text = font.render('Меню', True, WHITE)
     screen.blit(caption_text, (caption.x + 70, caption.y + 20))
     filenames = next(walk("levels"), (None, None, []))[2]
-    print(filenames)
 
     buttons = dict()
     for i in range(len(filenames)):
@@ -57,12 +56,11 @@ def menu(id):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            if buttons is dict:
-                for key, value in buttons:
-                    if event.type == pygame.MOUSEBUTTONDOWN:
-                        mouse_pos = event.pos
-                        if value.collidepoint(mouse_pos):
-                            draw_game_scene(id, key)
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                for key, value in buttons.items():
+                    mouse_pos = event.pos
+                    if value.collidepoint(mouse_pos):
+                        draw_game_scene(id, int(key[0]))
 
         clock.tick(30)
 

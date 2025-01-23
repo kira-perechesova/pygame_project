@@ -144,9 +144,7 @@ def draw_game_scene(character_id, level_id):
         screen.blit(game_scene_image, (0, 0))
         coords_platform.clear()
 
-        f = open(f"levels/{level}")
-
-        data = json.load(f)
+        f = open(f"levels/{level}.json")
 
 
         if level == 1:
@@ -205,9 +203,10 @@ def draw_game_scene(character_id, level_id):
             group.remove()
             group.empty()
             if inversion:
-                for j in range(len(characters[0][animations[animation]])):
-                    characters[0][animations[animation]][j].image = pygame.transform.flip(
-                        characters[0][animations[animation]][j].image, True, False)
+                for i in range(len(characters[0])):
+                    for j in range(len(characters[0][i])):
+                        characters[0][i][j].image = pygame.transform.flip(
+                            characters[0][i][j].image, True, False)
             characters[0][animations[animation]][stage].rect.x = x
             characters[0][animations[animation]][stage].rect.y = y
             characters[0][animations[animation]][stage].mask = pygame.mask.from_surface(
@@ -289,6 +288,7 @@ def draw_game_scene(character_id, level_id):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+                sys.exit()
 
         if is_update:
             intersection = False

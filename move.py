@@ -409,15 +409,43 @@ if __name__ == '__main__':
                 sprite.rect.x, sprite.rect.y = 0, 528
                 characters[i][j][w] = sprite
 
-    background = pygame.sprite.Group()
-    player = pygame.sprite.Group()
+    border_group = pygame.sprite.Group()
+    player_group = pygame.sprite.Group()
 
-    coords_platform = []
+
+    class Border(pygame.sprite.Sprite):
+        def __init__(self, group, x1, y1, x2, y2):
+            super().__init__(group)
+            self.image = pygame.image.load('../../images/for_levels/platform.png').convert()
+            self.image = pygame.transform.scale(self.image, (x2 - x1, y2 - y1))
+            self.rect = self.image.get_rect()
+            self.mask = pygame.mask.from_surface(self.image)
+            self.rect.x = x1
+            self.rect.y = y1
+
+
+    class Player(pygame.sprite.Sprite):
+        def __init__(self, group, x, y):
+            super().__init__(group)
+            self.image = pygame.image.load('../../images/character/character1/idle/Idle_1.png').convert_alpha()
+            self.rect = self.image.get_rect()
+            self.mask = pygame.mask.from_surface(self.image)
+            self.rect.x = x
+            self.rect.y = y
+            self.velocity_y = 5
+
+        def update(self):
+            if not pygame.sprite.spritecollideany(self, border_group):
+                self.rect.y += self.velocity_y
+
+
+    coords_platform_group = []
+
 
     def create_background(level):
         if level == 1:
-            background.remove()
-            background.empty()
+            border_group.remove()
+            border_group.empty()
             screen.blit(background1_png, (0, 0))
             k = 0
             for i in range(15):
@@ -425,8 +453,8 @@ if __name__ == '__main__':
                 platform.image = pygame.image.load('images/for_levels/platform.png')
                 platform.rect = sprite.image.get_rect()
                 platform.rect.x, platform.rect.y = k, 570
-                background.add(platform)
-                coords_platform.append((k, 570))
+                border_group.add(platform)
+                coords_platform_group.append((k, 570))
                 k += 30
             k = 700
             for i in range(7):
@@ -434,8 +462,8 @@ if __name__ == '__main__':
                 platform.image = pygame.image.load('images/for_levels/platform.png')
                 platform.rect = sprite.image.get_rect()
                 platform.rect.x, platform.rect.y = k, 570
-                background.add(platform)
-                coords_platform.append((k, 570))
+                border_group.add(platform)
+                coords_platform_group.append((k, 570))
                 k += 30
             k = 200
             for i in range(4):
@@ -443,8 +471,8 @@ if __name__ == '__main__':
                 platform.image = pygame.image.load('images/for_levels/platform.png')
                 platform.rect = sprite.image.get_rect()
                 platform.rect.x, platform.rect.y = k, 490
-                background.add(platform)
-                coords_platform.append((k, 490))
+                border_group.add(platform)
+                coords_platform_group.append((k, 490))
                 k += 30
             k = 540
             for i in range(2):
@@ -452,17 +480,17 @@ if __name__ == '__main__':
                 platform.image = pygame.image.load('images/for_levels/platform.png')
                 platform.rect = sprite.image.get_rect()
                 platform.rect.x, platform.rect.y = k, 490
-                background.add(platform)
-                coords_platform.append((k, 490))
+                border_group.add(platform)
+                coords_platform_group.append((k, 490))
                 k += 30
             for i in range(1):
                 platform = pygame.sprite.Sprite()
                 platform.image = pygame.image.load('images/for_levels/platform.png')
                 platform.rect = sprite.image.get_rect()
                 platform.rect.x, platform.rect.y = 420, 540
-                background.add(platform)
-                coords_platform.append((420, 540))
-            background.draw(screen)
+                border_group.add(platform)
+                coords_platform_group.append((420, 540))
+            border_group.draw(screen)
         elif level == 2:
             pass
         elif level == 3:
@@ -491,100 +519,114 @@ if __name__ == '__main__':
 
     create_background(1)
     running = True
-    speed = 100  # пикселей в секунду
-    jump_height = 9
-    fps = 60
+    speed_player_int = 8  # пикселей в секунду
+    jump_height_int = 9
+    fps = 45
     clock = pygame.time.Clock()
     player_x, player_y = 0, 528
-    is_update = True
-    is_jump = False
-    is_inversion = False
-    is_right = True
-    animation = 'idle'
-    stage = 0
-    character = 3
-    count_events = 0
-    level = 1
-    change_player(player, character, animation, 0, player_x, player_y)
-    player.draw(screen)
+    is_update_bool = True
+    is_jump_bool = False
+    is_inversion_bool = False
+    is_right_bool = True
+    animation_string = 'idle'
+    stage_float = 0
+    character_int = 3
+    count_events_int = 0
+    level_int = 1
+    change_player(player_group, character_int, animation_string, 0, player_x, player_y)
+    player_group.draw(screen)
     while running:
         events = pygame.key.get_pressed()
-        if not is_jump:
+        if not is_jump_bool:
             if events[pygame.K_UP]:
-                is_jump = True
-                jump_height = 9
-                animation = 'jump'
-                stage = 0
-                count_events += 1
+                is_jump_bool = True
+                jump_height_int = 9
+                animation_string = 'jump'
+                stage_float = 0
+                count_events_int += 1
         else:
-            stage = (stage + 0.4) % len(characters[character - 1][animations[animation]])
-            animation = 'jump'
-            if jump_height >= -9:
-                if jump_height > 0:
-                    player_y -= (jump_height ** 2) / 2
+            stage_float = (stage_float + 0.4) % len(characters[character_int - 1][animations[animation_string]])
+            animation_string = 'jump'
+            if jump_height_int >= -9:
+                if jump_height_int > 0:
+                    player_y -= (jump_height_int ** 2) / 2
                 else:
-                    player_y += (jump_height ** 2) / 2
-                jump_height -= 1
+                    player_y += (jump_height_int ** 2) / 2
+                jump_height_int -= 1
             else:
-                is_jump = False
-            is_update = True
+                is_jump_bool = False
+            is_update_bool = True
 
         if events[pygame.K_DOWN]:
             pass
 
         if events[pygame.K_RIGHT]:
-            count_events += 1
-            if not is_jump:
-                animation = 'walk'
-                stage = (stage + 0.25) % len(characters[character - 1][animations[animation]])
-            if is_right:
-                is_inversion = False
+            count_events_int += 1
+            if not is_jump_bool:
+                animation_string = 'walk'
+                stage_float = (stage_float + 0.25) % len(characters[character_int - 1][animations[animation_string]])
+            if is_right_bool:
+                is_inversion_bool = False
             else:
-                is_inversion = True
+                is_inversion_bool = True
             player_x += 8
-            is_right = True
-            is_update = True
+            is_right_bool = True
+            is_update_bool = True
 
         if events[pygame.K_LEFT]:
-            count_events += 1
-            if not is_jump:
-                animation = 'walk'
-                stage = (stage + 0.25) % len(characters[character - 1][animations[animation]])
-            if is_right:
-                is_inversion = True
+            count_events_int += 1
+            if not is_jump_bool:
+                animation_string = 'walk'
+                stage_float = (stage_float + 0.25) % len(characters[character_int - 1][animations[animation_string]])
+            if is_right_bool:
+                is_inversion_bool = True
             else:
-                is_inversion = False
+                is_inversion_bool = False
             player_x -= 8
-            is_right = False
-            is_update = True
+            is_right_bool = False
+            is_update_bool = True
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
-        if is_update:
+        if is_update_bool:
             intersection = False
             intersection2 = False
-            create_background(level)
+            create_background(level_int)
             old_x, old_y = 0, 528
-            for player_mask in player:
+            for player_mask in player_group:
                 old_x, old_y = player_mask.rect.x, player_mask.rect.y
-            change_player(player, character, animation, int(stage), player_x, player_y, is_inversion)
-            is_inversion = False
-            for el in background:
-                for player_mask in player:
+            change_player(player_group, character_int, animation_string, int(stage_float), player_x, player_y,
+                          is_inversion_bool)
+            is_inversion_bool = False
+            for player in player_group:
+                if not pygame.sprite.spritecollideany(player, border_group):
+                    player_y += 6
+            change_player(player_group, character_int, animation_string, int(stage_float), player_x, player_y,
+                          is_inversion_bool)
+            for player in player_group:
+                if pygame.sprite.spritecollideany(player, border_group):
+                    if pygame.sprite.collide_mask(pygame.sprite.spritecollideany(player, border_group), player):
+                        player_y -= pygame.sprite.collide_mask(pygame.sprite.spritecollideany(player,
+                                                                                              border_group),
+                                                               player)[1]
+            for el in border_group:
+                for player_mask in player_group:
                     if pygame.sprite.collide_mask(player_mask, el):
                         intersection = True
-            change_player(player, character, animation, int(stage), player_x, player_y, is_inversion)
+            change_player(player_group, character_int, animation_string, int(stage_float), player_x, player_y,
+                          is_inversion_bool)
             if intersection:
                 player_x, player_y = old_x, old_y
                 intersection = False
-            change_player(player, character, animation, int(stage), player_x, player_y, is_inversion)
-            if (count_events == 0) and not is_jump:
-                animation = 'idle'
-                stage = (stage + 0.15) % 3
-            player.draw(screen)
-            count_events = 0
+            change_player(player_group, character_int, animation_string, int(stage_float), player_x, player_y,
+                          is_inversion_bool)
+            if (count_events_int == 0) and not is_jump_bool:
+                animation_string = 'idle'
+                stage_float = (stage_float + 0.15) % 3
+            player_group.draw(screen)
+            count_events_int = 0
         pygame.display.flip()
         clock.tick(fps)
     pygame.quit()
