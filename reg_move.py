@@ -147,53 +147,20 @@ def draw_game_scene(character_id, level_id):
         f = open(f"levels/{level}.json")
 
 
+        data = json.load(f)
+
+
         if level == 1:
             k = 0
-            for i in range(15):
+
+            for i in data["platforms"]:
                 platform = pygame.sprite.Sprite()
                 platform.image = platform_png
                 platform.rect = platform.image.get_rect()
-                platform.rect.x, platform.rect.y = k, 570
+                platform.rect.x, platform.rect.y = i["x"], i["y"]
                 background.add(platform)
-                coords_platform.append((k, 570))
-                k += 30
+                coords_platform.append((i["x"], i["y"]))
 
-            k = 700
-            for i in range(7):
-                platform = pygame.sprite.Sprite()
-                platform.image = platform_png
-                platform.rect = platform.image.get_rect()
-                platform.rect.x, platform.rect.y = k, 570
-                background.add(platform)
-                coords_platform.append((k, 570))
-                k += 30
-
-            k = 200
-            for i in range(4):
-                platform = pygame.sprite.Sprite()
-                platform.image = platform_png
-                platform.rect = platform.image.get_rect()
-                platform.rect.x, platform.rect.y = k, 490
-                background.add(platform)
-                coords_platform.append((k, 490))
-                k += 30
-
-            k = 540
-            for i in range(2):
-                platform = pygame.sprite.Sprite()
-                platform.image = platform_png
-                platform.rect = platform.image.get_rect()
-                platform.rect.x, platform.rect.y = k, 490
-                background.add(platform)
-                coords_platform.append((k, 490))
-                k += 30
-
-            platform = pygame.sprite.Sprite()
-            platform.image = platform_png
-            platform.rect = platform.image.get_rect()
-            platform.rect.x, platform.rect.y = 420, 540
-            background.add(platform)
-            coords_platform.append((420, 540))
 
         f.close()
         background.draw(screen)
