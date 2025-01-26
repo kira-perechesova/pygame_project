@@ -254,7 +254,9 @@ def draw_game_scene(character_id, level_id):
         else:
             is_shift = False
 
-        if events[pygame.K_RIGHT] or events[pygame.K_d]:
+        if (events[pygame.K_RIGHT] or events[pygame.K_d]) and (events[pygame.K_LEFT] or events[pygame.K_a]):
+            pass
+        elif events[pygame.K_RIGHT] or events[pygame.K_d]:
             count_events += 1
             if not is_jump:
                 if is_shift:
@@ -276,7 +278,7 @@ def draw_game_scene(character_id, level_id):
             is_right = True
             is_update = True
 
-        if events[pygame.K_LEFT] or events[pygame.K_a]:
+        elif events[pygame.K_LEFT] or events[pygame.K_a]:
             count_events += 1
             if not is_jump:
                 if is_shift:
