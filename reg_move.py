@@ -33,9 +33,11 @@ character1_image = pygame.transform.scale(character1_image, (200, 200))
 character2_image = pygame.transform.scale(character2_image, (200, 200))
 character3_image = pygame.transform.scale(character3_image, (200, 200))
 
+
 def connect_db():
     conn = sqlite3.connect('game.sqlite')
     return conn
+
 
 # Получить всех пользователей
 def get_all_users():
@@ -64,6 +66,7 @@ def draw_main_screen():
 
     pygame.display.flip()
 
+
 # экран входа
 def draw_login_screen():
     screen.fill(BLACK)
@@ -89,7 +92,6 @@ def draw_login_screen():
             screen.blit(play_button_text, (play_button.x + 15, play_button.y + 5))
 
     pygame.display.flip()
-
 
 
 def draw_game_scene(character_id, level_id):
@@ -136,6 +138,7 @@ def draw_game_scene(character_id, level_id):
                 characters[i][j][w] = sprite
 
     background = pygame.sprite.Group()
+    coins = pygame.sprite.Group()
     player = pygame.sprite.Group()
     coords_platform = []
 
@@ -145,7 +148,6 @@ def draw_game_scene(character_id, level_id):
         coords_platform.clear()
 
         f = open(f"levels/{level}.json")
-
 
         data = json.load(f)
         for i in data["platforms"]:
@@ -157,9 +159,25 @@ def draw_game_scene(character_id, level_id):
             background.add(platform)
             coords_platform.append((i["x"], i["y"]))
 
-
         f.close()
         background.draw(screen)
+
+    def create_coins(level):
+        coins.empty()
+
+        f = open(f"levels_coins/{level}.json")
+
+        data = json.load(f)
+        for i in data["platforms"]:
+            coin = pygame.sprite.Sprite()
+            coin.image = coin_png
+            coin.rect = coin.image.get_rect()
+            coin.rect.x, coin.rect.y = i["x"], i["y"]
+            coin.mask = pygame.mask.from_surface(coin.image)
+            coins.add(coin)
+
+        f.close()
+        coins.draw(screen)
 
     def change_player(group, animation, stage, x, y, inversion=0):
         try:
@@ -178,7 +196,14 @@ def draw_game_scene(character_id, level_id):
         except Exception:
             pass
 
+    def check_coins():
+        for el in coins:
+            for player_mask in player:
+                if pygame.sprite.collide_mask(el, player_mask):
+                    el.kill()
+
     create_background(level_id)
+    create_coins(level_id)
 
     running = True
     falling_speed = 6
@@ -189,12 +214,10 @@ def draw_game_scene(character_id, level_id):
     is_update = True
     is_jump = False
     is_inversion = False
-    is_shift = False
     is_right = True
     animation = 'idle'
     stage = 0
     count_events = 0
-    level = 1
     change_player(player, animation, 0, player_x, player_y)
     player.draw(screen)
 
@@ -281,6 +304,7 @@ def draw_game_scene(character_id, level_id):
             intersection = False
             intersection2 = False
             create_background(level_id)
+            coins.draw(screen)
             old_x, old_y = 0, 528
             el_y = 0
             for player_mask in player:
@@ -320,6 +344,7 @@ def draw_game_scene(character_id, level_id):
                 if intersection2:
                     player_y = el_y
             change_player(player, animation, int(stage), player_x, player_y, is_inversion)
+            check_coins()
             if (count_events == 0) and not is_jump:
                 animation = 'idle'
                 stage = (stage + 0.15) % 3
@@ -327,12 +352,12 @@ def draw_game_scene(character_id, level_id):
                 player_x, player_y = 0, 528
                 stage = 0
                 change_player(player, animation, int(stage), player_x, player_y, is_inversion)
+            check_coins()
             player.draw(screen)
             count_events = 0
         pygame.display.flip()
         clock.tick(fps)
     pygame.quit()
-
 
 
 def draw_register_screen(username_text, character_id):
@@ -385,6 +410,7 @@ def draw_register_screen(username_text, character_id):
 
     pygame.display.flip()
 
+
 # добавление пользователя в бд
 def register_user(username, character_id):
     conn = connect_db()
@@ -392,6 +418,7 @@ def register_user(username, character_id):
     cursor.execute("INSERT INTO user (username, character_id) VALUES (?, ?)", (username, character_id))
     conn.commit()
     conn.close()
+
 
 def main():
     clock = pygame.time.Clock()
@@ -465,7 +492,6 @@ def main():
                     else:
                         active_input = None
 
-
             if event.type == pygame.KEYDOWN:
                 if current_screen == 'register' and active_input:
                     if event.key == pygame.K_BACKSPACE:
@@ -487,6 +513,7 @@ def main():
             menu(character_id)
 
         clock.tick(30)
+
 
 if __name__ == '__main__':
     main()
