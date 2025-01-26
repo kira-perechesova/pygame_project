@@ -148,18 +148,14 @@ def draw_game_scene(character_id, level_id):
 
 
         data = json.load(f)
-
-
-        if level == 1:
-            k = 0
-
-            for i in data["platforms"]:
-                platform = pygame.sprite.Sprite()
-                platform.image = platform_png
-                platform.rect = platform.image.get_rect()
-                platform.rect.x, platform.rect.y = i["x"], i["y"]
-                background.add(platform)
-                coords_platform.append((i["x"], i["y"]))
+        for i in data["platforms"]:
+            platform = pygame.sprite.Sprite()
+            platform.image = platform_png
+            platform.rect = platform.image.get_rect()
+            platform.rect.x, platform.rect.y = i["x"], i["y"]
+            platform.mask = pygame.mask.from_surface(platform.image)
+            background.add(platform)
+            coords_platform.append((i["x"], i["y"]))
 
 
         f.close()
@@ -284,7 +280,7 @@ def draw_game_scene(character_id, level_id):
         if is_update:
             intersection = False
             intersection2 = False
-            create_background(level)
+            create_background(level_id)
             old_x, old_y = 0, 528
             el_y = 0
             for player_mask in player:

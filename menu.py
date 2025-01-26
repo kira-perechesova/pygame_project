@@ -60,7 +60,8 @@ def menu(id):
                 for key, value in buttons.items():
                     mouse_pos = event.pos
                     if value.collidepoint(mouse_pos):
-                        draw_game_scene(id, int(key[0]))
+                        draw_game_scene(id, key[:-5])
+                        print(key[0])
 
         clock.tick(30)
 
