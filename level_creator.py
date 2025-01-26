@@ -67,3 +67,12 @@ while k != "stop":
 
 f.write(json.dumps(data))
 f.close()
+
+print('write the background number: 1, 2, 3 or 4')
+background = input()
+f = open("levels_background/" + level_name + ".txt", "w")
+if background in ('1', '2', '3', '4'):
+    f.write(background)
+else:
+    f.write('1')
+f.close()

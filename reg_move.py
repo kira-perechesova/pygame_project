@@ -144,7 +144,6 @@ def draw_game_scene(character_id, level_id):
 
     def create_background(level):
         background.empty()
-        screen.blit(game_scene_image, (0, 0))
         coords_platform.clear()
 
         f = open(f"levels/{level}.json")
@@ -160,6 +159,10 @@ def draw_game_scene(character_id, level_id):
             coords_platform.append((i["x"], i["y"]))
 
         f.close()
+        f = open(f"levels_background/{level}.txt")
+        image = pygame.image.load(f'images/for_levels/background/background{f.read()}.png').convert_alpha()
+        f.close()
+        screen.blit(image, (0, 0))
         background.draw(screen)
 
     def create_coins(level):
