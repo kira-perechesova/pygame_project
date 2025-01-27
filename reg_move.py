@@ -21,6 +21,7 @@ GREY = (100, 100, 100)
 SELECTED = (200, 200, 0)
 
 font = pygame.font.Font('fonts/PressStart2P-Regular.ttf', 14)
+font2 = pygame.font.Font('fonts/PressStart2P-Regular.ttf', 26)
 
 background_image = pygame.image.load('images/for_levels/background/background2.png')
 background_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT))
@@ -43,7 +44,7 @@ def connect_db():
 def get_all_users():
     conn = connect_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT username, character_id FROM user")
+    cursor.execute("SELECT username, character_id, coins, levels FROM user")
     users = cursor.fetchall()
     conn.close()
     return users
@@ -81,7 +82,7 @@ def draw_login_screen():
     # Отображение списка пользователей с кнопками "Играть"
     users = get_all_users()
     user_list_start_y = 150
-    for idx, (username, _) in enumerate(users):
+    for idx, (username, _, _, _) in enumerate(users):
         if username:
             user_text = font.render(str(username), True, WHITE)
             screen.blit(user_text, (100, user_list_start_y + idx * 40))
@@ -94,7 +95,7 @@ def draw_login_screen():
     pygame.display.flip()
 
 
-def draw_game_scene(character_id, level_id):
+def draw_game_scene(character_id, level_id, user_id):
     game_scene_image = pygame.image.load('images/for_levels/background/background1.png')
     game_scene_image = pygame.transform.scale(game_scene_image, (WIDTH, HEIGHT))
     screen.blit(game_scene_image, (0, 0))
@@ -146,7 +147,7 @@ def draw_game_scene(character_id, level_id):
         background.empty()
         coords_platform.clear()
 
-        f = open(f"levels/{level}.json")
+        f = open(f"levels/platforms/{level}.json")
 
         data = json.load(f)
         for i in data["platforms"]:
@@ -159,7 +160,7 @@ def draw_game_scene(character_id, level_id):
             coords_platform.append((i["x"], i["y"]))
 
         f.close()
-        f = open(f"levels_background/{level}.txt")
+        f = open(f"levels/background/{level}.txt")
         image = pygame.image.load(f'images/for_levels/background/background{f.read()}.png').convert_alpha()
         f.close()
         screen.blit(image, (0, 0))
@@ -168,7 +169,7 @@ def draw_game_scene(character_id, level_id):
     def create_coins(level):
         coins.empty()
 
-        f = open(f"levels_coins/{level}.json")
+        f = open(f"levels/coins/{level}.json")
 
         data = json.load(f)
         for i in data["platforms"]:
@@ -218,7 +219,9 @@ def draw_game_scene(character_id, level_id):
     is_jump = False
     is_inversion = False
     is_right = True
+    game_run = True
     animation = 'idle'
+    quantity_coins = len(coins)
     stage = 0
     count_events = 0
     change_player(player, animation, 0, player_x, player_y)
@@ -234,8 +237,8 @@ def draw_game_scene(character_id, level_id):
                 stage = 0
                 count_events += 1
         else:
-            stage = (stage + 0.25) % len(characters[0][animations[animation]])
             animation = 'jump'
+            stage = (stage + 0.25) % len(characters[0][animations[animation]])
             if jump_height >= -9:
                 if jump_height > 0:
                     player_y -= (jump_height ** 2) / 2
@@ -256,6 +259,7 @@ def draw_game_scene(character_id, level_id):
 
         if (events[pygame.K_RIGHT] or events[pygame.K_d]) and (events[pygame.K_LEFT] or events[pygame.K_a]):
             pass
+
         elif events[pygame.K_RIGHT] or events[pygame.K_d]:
             count_events += 1
             if not is_jump:
@@ -320,7 +324,6 @@ def draw_game_scene(character_id, level_id):
                 for player_mask in player:
                     if pygame.sprite.collide_mask(el, player_mask):
                         intersection = True
-            change_player(player, animation, int(stage), player_x, player_y, is_inversion)
             if intersection:
                 player_x, player_y = old_x, old_y
             change_player(player, animation, int(stage), player_x, player_y, is_inversion)
@@ -353,10 +356,28 @@ def draw_game_scene(character_id, level_id):
             if (count_events == 0) and not is_jump:
                 animation = 'idle'
                 stage = (stage + 0.15) % 3
+            if (len(coins) == 0) and game_run:
+                users = get_all_users()
+                if level_id not in str(users[user_id][3]).split():
+                    conn = connect_db()
+                    cursor = conn.cursor()
+                    cursor.execute("DELETE FROM user WHERE id = ?", (user_id + 1,))
+                    cursor.execute(
+                        "INSERT INTO user (id, username, character_id, coins, levels) VALUES (?, ?, ?, ?, ?)",
+                        (user_id + 1, users[user_id][0], character_id,
+                         users[user_id][2] + quantity_coins, str(users[user_id][3]) + ' ' + level_id))
+                    game_run = False
+                    conn.commit()
+                    conn.close()
+                    users = get_all_users()
+                    res = (character_id, users[user_id][3], user_id)
             if player_y >= 624:
                 player_x, player_y = 0, 528
                 stage = 0
                 change_player(player, animation, int(stage), player_x, player_y, is_inversion)
+                create_coins(level_id)
+            quantity_coins_text = font2.render(str(quantity_coins - len(coins)), True, WHITE)
+            screen.blit(quantity_coins_text, (1020, 20))
             check_coins()
             player.draw(screen)
             count_events = 0
@@ -420,7 +441,9 @@ def draw_register_screen(username_text, character_id):
 def register_user(username, character_id):
     conn = connect_db()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO user (username, character_id) VALUES (?, ?)", (username, character_id))
+    coin, lvl = 0, ' '
+    cursor.execute("INSERT INTO user (username, character_id, coins, levels) VALUES (?, ?, ?, ?)",
+                   (username, character_id, coin, lvl))
     conn.commit()
     conn.close()
 
@@ -430,6 +453,7 @@ def main():
     current_screen = 'main'
     username_text = ''
     character_id = 0
+    levels_user = []
     active_input = None  # 'username'
 
     while True:
@@ -458,10 +482,12 @@ def main():
 
                     users = get_all_users()
                     user_list_start_y = 150
-                    for idx, (username, char_id) in enumerate(users):
+                    for idx, (username, char_id, coins, levels) in enumerate(users):
                         play_button = pygame.Rect(300, user_list_start_y + idx * 40, 100, 25)
                         if play_button.collidepoint(mouse_pos):
                             character_id = char_id
+                            id_user = idx
+                            levels_user = str(levels).split()
                             current_screen = 'game_scene'
 
                 if current_screen == 'register':
@@ -493,7 +519,7 @@ def main():
                     elif register_button.collidepoint(mouse_pos):
                         if username_text and character_id != 0:
                             register_user(username_text, character_id)
-                            current_screen = 'game_scene'
+                            current_screen = 'login'
                     else:
                         active_input = None
 
@@ -515,7 +541,7 @@ def main():
         elif current_screen == 'register':
             draw_register_screen(username_text, character_id)
         elif current_screen == 'game_scene':
-            menu(character_id)
+            menu(character_id, levels_user, id_user)
 
         clock.tick(30)
 

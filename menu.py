@@ -22,7 +22,7 @@ background_image = pygame.image.load('images/for_levels/background/background2.p
 background_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT))
 
 
-def draw_menu() -> {str: pygame.Rect}:
+def draw_menu(levels) -> {str: pygame.Rect}:
     screen.blit(background_image, (0, 0))
 
     caption = pygame.Rect(450, 50, 200, 60)
@@ -31,14 +31,17 @@ def draw_menu() -> {str: pygame.Rect}:
 
     caption_text = font.render('Меню', True, WHITE)
     screen.blit(caption_text, (caption.x + 70, caption.y + 20))
-    filenames = next(walk("levels"), (None, None, []))[2]
+    filenames = next(walk("levels/platforms"), (None, None, []))[2]
 
     buttons = dict()
     for i in range(len(filenames)):
         x = (i % 6) * 100 + 100
         y = (i // 6) * 100 + 150
         button = pygame.Rect(x, y, 100, 100)
-        pygame.draw.rect(screen, BLACK, button)
+        if filenames[i][:-5] not in levels:
+            pygame.draw.rect(screen, BLACK, button)
+        else:
+            pygame.draw.rect(screen, (105, 179, 104), button)
         buttons[filenames[i]] = button
         button_text = font.render(filenames[i].rstrip(".json"), True, WHITE)
         screen.blit(button_text, (x + 40, y + 40))
@@ -47,9 +50,9 @@ def draw_menu() -> {str: pygame.Rect}:
     return buttons
 
 
-def menu(id):
+def menu(id, levels, id_user):
     clock = pygame.time.Clock()
-    buttons: {str: pygame.Rect} = draw_menu()
+    buttons: {str: pygame.Rect} = draw_menu(levels)
     while True:
 
         for event in pygame.event.get():
@@ -60,11 +63,10 @@ def menu(id):
                 for key, value in buttons.items():
                     mouse_pos = event.pos
                     if value.collidepoint(mouse_pos):
-                        draw_game_scene(id, key[:-5])
-                        print(key[0])
+                        draw_game_scene(id, key[:-5], id_user)
 
         clock.tick(30)
 
 
 if __name__ == '__main__':
-    menu(1)
+    menu(1, [], 0)
