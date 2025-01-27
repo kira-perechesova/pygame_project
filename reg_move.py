@@ -44,7 +44,7 @@ def connect_db():
 def get_all_users():
     conn = connect_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT username, character_id, coins, levels FROM user")
+    cursor.execute("SELECT username, character_id, coins, levels, id FROM user")
     users = cursor.fetchall()
     conn.close()
     return users
@@ -82,7 +82,7 @@ def draw_login_screen():
     # Отображение списка пользователей с кнопками "Играть"
     users = get_all_users()
     user_list_start_y = 150
-    for idx, (username, _, _, _) in enumerate(users):
+    for idx, (username, _, _, _, _) in enumerate(users):
         if username:
             user_text = font.render(str(username), True, WHITE)
             screen.blit(user_text, (100, user_list_start_y + idx * 40))
@@ -361,10 +361,10 @@ def draw_game_scene(character_id, level_id, user_id):
                 if level_id not in str(users[user_id][3]).split():
                     conn = connect_db()
                     cursor = conn.cursor()
-                    cursor.execute("DELETE FROM user WHERE id = ?", (user_id + 1,))
+                    cursor.execute("DELETE FROM user WHERE id = ?", (users[user_id][4],))
                     cursor.execute(
                         "INSERT INTO user (id, username, character_id, coins, levels) VALUES (?, ?, ?, ?, ?)",
-                        (user_id + 1, users[user_id][0], character_id,
+                        (users[user_id][4], users[user_id][0], character_id,
                          users[user_id][2] + quantity_coins, str(users[user_id][3]) + ' ' + level_id))
                     game_run = False
                     conn.commit()
@@ -482,7 +482,7 @@ def main():
 
                     users = get_all_users()
                     user_list_start_y = 150
-                    for idx, (username, char_id, coins, levels) in enumerate(users):
+                    for idx, (username, char_id, coins, levels, _) in enumerate(users):
                         play_button = pygame.Rect(300, user_list_start_y + idx * 40, 100, 25)
                         if play_button.collidepoint(mouse_pos):
                             character_id = char_id
