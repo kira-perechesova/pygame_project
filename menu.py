@@ -35,7 +35,7 @@ def draw_menu(levels) -> {str: pygame.Rect}:
 
     buttons = dict()
 
-    back = pygame.Rect(50, 50 , 150, 50)
+    back = pygame.Rect(50, 50, 150, 50)
 
     pygame.draw.rect(screen, BLACK, back)
 

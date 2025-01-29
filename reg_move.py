@@ -5,7 +5,6 @@ import json
 from os import walk
 
 
-
 def draw_menu(levels) -> {str: pygame.Rect}:
     screen.blit(background_image, (0, 0))
 
@@ -19,7 +18,7 @@ def draw_menu(levels) -> {str: pygame.Rect}:
 
     buttons = dict()
 
-    back = pygame.Rect(50, 50 , 150, 50)
+    back = pygame.Rect(50, 50, 150, 50)
 
     pygame.draw.rect(screen, BLACK, back)
 
@@ -64,8 +63,6 @@ def init_menu(id, levels, id_user):
                         draw_main()
 
         clock.tick(30)
-
-
 
 
 pygame.init()
@@ -283,13 +280,18 @@ def draw_game_scene(character_id, level_id, user_id):
     is_jump = False
     is_inversion = False
     is_right = True
-    game_run = True
+    is_level_not_complete = True
     animation = 'idle'
     quantity_coins = len(coins)
     stage = 0
     count_events = 0
     change_player(player, animation, 0, player_x, player_y)
     player.draw(screen)
+    back = pygame.Rect(50, 50, 150, 50)
+    pygame.draw.rect(screen, BLACK, back)
+    back_text = font.render("НАЗАД", True, WHITE)
+    screen.blit(back_text, (90, 70))
+    complete_text = font.render("Уровень пройден!", True, WHITE)
 
     while running:
         events = pygame.key.get_pressed()
@@ -372,6 +374,12 @@ def draw_game_scene(character_id, level_id, user_id):
             if event.type == pygame.QUIT:
                 running = False
                 sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = event.pos
+                if back.collidepoint(mouse_pos):
+                    users = get_all_users()
+                    running = False
+                    init_menu(character_id, str(users[user_id][3]).split(), user_id)
 
         if is_update:
             intersection = False
@@ -420,7 +428,7 @@ def draw_game_scene(character_id, level_id, user_id):
             if (count_events == 0) and not is_jump:
                 animation = 'idle'
                 stage = (stage + 0.15) % 3
-            if (len(coins) == 0) and game_run:
+            if (len(coins) == 0) and is_level_not_complete:
                 users = get_all_users()
                 if level_id not in str(users[user_id][3]).split():
                     conn = connect_db()
@@ -430,11 +438,12 @@ def draw_game_scene(character_id, level_id, user_id):
                         "INSERT INTO user (id, username, character_id, coins, levels) VALUES (?, ?, ?, ?, ?)",
                         (users[user_id][4], users[user_id][0], character_id,
                          users[user_id][2] + quantity_coins, str(users[user_id][3]) + ' ' + level_id))
-                    game_run = False
+                    is_level_not_complete = False
                     conn.commit()
                     conn.close()
-                    users = get_all_users()
-                    res = (character_id, users[user_id][3], user_id)
+            users = get_all_users()
+            if level_id in str(users[user_id][3]).split():
+                screen.blit(complete_text, (440, 60))
             if player_y >= 624:
                 player_x, player_y = 0, 528
                 stage = 0
@@ -445,6 +454,8 @@ def draw_game_scene(character_id, level_id, user_id):
             check_coins()
             player.draw(screen)
             count_events = 0
+            pygame.draw.rect(screen, BLACK, back)
+            screen.blit(back_text, (90, 70))
         pygame.display.flip()
         clock.tick(fps)
     pygame.quit()
