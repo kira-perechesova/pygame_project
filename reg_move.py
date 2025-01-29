@@ -428,6 +428,10 @@ def draw_game_scene(character_id, level_id, user_id):
             if (count_events == 0) and not is_jump:
                 animation = 'idle'
                 stage = (stage + 0.15) % 3
+            users = get_all_users()
+            if level_id in str(users[user_id][3]).split():
+                screen.blit(complete_text, (440, 60))
+                is_level_not_complete = False
             if (len(coins) == 0) and is_level_not_complete:
                 users = get_all_users()
                 if level_id not in str(users[user_id][3]).split():
@@ -441,9 +445,6 @@ def draw_game_scene(character_id, level_id, user_id):
                     is_level_not_complete = False
                     conn.commit()
                     conn.close()
-            users = get_all_users()
-            if level_id in str(users[user_id][3]).split():
-                screen.blit(complete_text, (440, 60))
             if player_y >= 624:
                 player_x, player_y = 0, 528
                 stage = 0
