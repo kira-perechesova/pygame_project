@@ -67,7 +67,6 @@ def init_menu(id, levels, id_user):
 
 
 
-
 pygame.init()
 
 WIDTH, HEIGHT = 1066, 600
@@ -230,6 +229,21 @@ def draw_game_scene(character_id, level_id, user_id):
         screen.blit(image, (0, 0))
         background.draw(screen)
 
+        up_button = pygame.Rect(900, 480, 50, 50)
+        pygame.draw.rect(screen, BLACK, up_button)
+        up_button_text = font.render('↑', True, WHITE)
+        screen.blit(up_button_text, (up_button.x + 19, up_button.y + 15))
+
+        left_button = pygame.Rect(850, 530, 50, 50)
+        pygame.draw.rect(screen, BLACK, left_button)
+        left_button_text = font.render('←', True, WHITE)
+        screen.blit(left_button_text, (left_button.x + 18, left_button.y + 18))
+
+        right_button = pygame.Rect(950, 530, 50, 50)
+        pygame.draw.rect(screen, BLACK, right_button)
+        right_button_text = font.render('→', True, WHITE)
+        screen.blit(right_button_text, (right_button.x + 18, right_button.y + 18))
+
     def create_coins(level):
         coins.empty()
 
@@ -291,8 +305,71 @@ def draw_game_scene(character_id, level_id, user_id):
     change_player(player, animation, 0, player_x, player_y)
     player.draw(screen)
 
+    up_button = pygame.Rect(900, 480, 50, 50)
+    left_button = pygame.Rect(850, 530, 50, 50)
+    right_button = pygame.Rect(950, 530, 50, 50)
+
     while running:
         events = pygame.key.get_pressed()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+                sys.exit()
+
+            # Проверка нажатия кнопки "вверх"
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = event.pos
+                if up_button.collidepoint(mouse_pos):
+                    is_jump = True
+                    jump_height = 9
+                    animation = 'jump'
+                    stage = 0
+                    count_events += 1
+                if left_button.collidepoint(mouse_pos):
+                    count_events += 1
+                    if not is_jump:
+                        if is_shift:
+                            animation = 'run'
+                            player_x -= 7
+                        else:
+                            animation = 'walk'
+                            player_x -= 4
+                        stage = (stage + 0.25) % len(characters[0][animations[animation]])
+                    else:
+                        if is_shift:
+                            player_x -= 7
+                        else:
+                            player_x -= 4
+                    if is_right:
+                        is_inversion = True
+                    else:
+                        is_inversion = False
+                    is_right = False
+                    is_update = True
+
+                if right_button.collidepoint(mouse_pos):
+                    count_events += 1
+                    if not is_jump:
+                        if is_shift:
+                            animation = 'run'
+                            player_x += 7
+                        else:
+                            animation = 'walk'
+                            player_x += 4
+                        stage = (stage + 0.25) % len(characters[0][animations[animation]])
+                    else:
+                        if is_shift:
+                            player_x += 7
+                        else:
+                            player_x += 4
+                    if is_right:
+                        is_inversion = False
+                    else:
+                        is_inversion = True
+                    is_right = True
+                    is_update = True
+
+
         if not is_jump:
             if events[pygame.K_UP] or events[pygame.K_SPACE] or events[pygame.K_w]:
                 is_jump = True
