@@ -1,7 +1,7 @@
 import pygame
 import sys
 from os import walk
-from reg_move import draw_game_scene
+from reg_move import draw_game_scene, draw_main
 
 pygame.init()
 
@@ -34,9 +34,19 @@ def draw_menu(levels) -> {str: pygame.Rect}:
     filenames = next(walk("levels/platforms"), (None, None, []))[2]
 
     buttons = dict()
+
+    back = pygame.Rect(50, 50 , 150, 50)
+
+    pygame.draw.rect(screen, BLACK, back)
+
+    buttons["back"] = back
+
+    button_text = font.render("НАЗАД", True, WHITE)
+    screen.blit(button_text, (90, 70))
+
     for i in range(len(filenames)):
-        x = (i % 6) * 100 + 100
-        y = (i // 6) * 100 + 150
+        x = (i % 6) * 110 + 100
+        y = (i // 6) * 110 + 150
         button = pygame.Rect(x, y, 100, 100)
         if filenames[i][:-5] not in levels:
             pygame.draw.rect(screen, BLACK, button)
@@ -50,9 +60,11 @@ def draw_menu(levels) -> {str: pygame.Rect}:
     return buttons
 
 
-def menu(id, levels, id_user):
+def init_menu(id, levels, id_user):
     clock = pygame.time.Clock()
     buttons: {str: pygame.Rect} = draw_menu(levels)
+    back = buttons["back"]
+    buttons.pop("back")
     while True:
 
         for event in pygame.event.get():
@@ -64,9 +76,11 @@ def menu(id, levels, id_user):
                     mouse_pos = event.pos
                     if value.collidepoint(mouse_pos):
                         draw_game_scene(id, key[:-5], id_user)
+                    elif back.collidepoint(mouse_pos):
+                        draw_main()
 
         clock.tick(30)
 
 
 if __name__ == '__main__':
-    menu(1, [], 0)
+    init_menu(1, [], 0)
