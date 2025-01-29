@@ -143,10 +143,14 @@ def draw_login_screen():
     # Отображение списка пользователей с кнопками "Играть"
     users = get_all_users()
     user_list_start_y = 150
-    for idx, (username, _, _, _, _) in enumerate(users):
+    coin_png = pygame.image.load('images/for_levels/coin.png').convert_alpha()
+    for idx, (username, _, coins, _, _) in enumerate(users):
         if username:
             user_text = font.render(str(username), True, WHITE)
             screen.blit(user_text, (100, user_list_start_y + idx * 40))
+            coins_text = font.render(str(coins), True, WHITE)
+            screen.blit(coins_text, (420, user_list_start_y + idx * 40 + 6))
+            screen.blit(coin_png, (425 + len(str(coins)) * 15, user_list_start_y + idx * 40))
 
             play_button = pygame.Rect(300, user_list_start_y + idx * 40, 100, 25)
             pygame.draw.rect(screen, GREEN, play_button)
