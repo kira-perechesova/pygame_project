@@ -336,18 +336,11 @@ def draw_game_scene(character_id, level_id, user_id):
                 if left_button.collidepoint(mouse_pos):
                     count_events += 1
                     if not is_jump:
-                        if is_shift:
-                            animation = 'run'
-                            player_x -= 7
-                        else:
-                            animation = 'walk'
-                            player_x -= 4
+                        animation = 'walk'
+                        player_x -= 15
                         stage = (stage + 0.25) % len(characters[0][animations[animation]])
                     else:
-                        if is_shift:
-                            player_x -= 7
-                        else:
-                            player_x -= 4
+                        player_x -= 15
                     if is_right:
                         is_inversion = True
                     else:
@@ -358,18 +351,11 @@ def draw_game_scene(character_id, level_id, user_id):
                 if right_button.collidepoint(mouse_pos):
                     count_events += 1
                     if not is_jump:
-                        if is_shift:
-                            animation = 'run'
-                            player_x += 7
-                        else:
-                            animation = 'walk'
-                            player_x += 4
+                        animation = 'walk'
+                        player_x += 15
                         stage = (stage + 0.25) % len(characters[0][animations[animation]])
                     else:
-                        if is_shift:
-                            player_x += 7
-                        else:
-                            player_x += 4
+                        player_x += 15
                     if is_right:
                         is_inversion = False
                     else:
