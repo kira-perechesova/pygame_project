@@ -54,7 +54,7 @@ def init_menu(id, levels, id_user):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if (event.type == pygame.MOUSEBUTTONDOWN) or (event.type == pygame.FINGERDOWN):
                 for key, value in buttons.items():
                     mouse_pos = event.pos
                     if value.collidepoint(mouse_pos):
@@ -325,7 +325,7 @@ def draw_game_scene(character_id, level_id, user_id):
                 sys.exit()
 
             # Проверка нажатия кнопки "вверх"
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if (event.type == pygame.MOUSEBUTTONDOWN) or (event.type == pygame.FINGERDOWN):
                 mouse_pos = event.pos
                 if up_button.collidepoint(mouse_pos):
                     is_jump = True
@@ -362,6 +362,11 @@ def draw_game_scene(character_id, level_id, user_id):
                         is_inversion = True
                     is_right = True
                     is_update = True
+
+                if back.collidepoint(mouse_pos):
+                    users = get_all_users()
+                    running = False
+                    init_menu(character_id, str(users[user_id][3]).split(), user_id)
 
         if not is_jump:
             if events[pygame.K_UP] or events[pygame.K_SPACE] or events[pygame.K_w]:
@@ -442,7 +447,7 @@ def draw_game_scene(character_id, level_id, user_id):
             if event.type == pygame.QUIT:
                 running = False
                 sys.exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if (event.type == pygame.MOUSEBUTTONDOWN) or (event.type == pygame.FINGERDOWN):
                 mouse_pos = event.pos
                 if back.collidepoint(mouse_pos):
                     users = get_all_users()
@@ -606,7 +611,7 @@ def draw_main():
                 pygame.quit()
                 sys.exit()
 
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if (event.type == pygame.MOUSEBUTTONDOWN) or (event.type == pygame.FINGERDOWN):
                 mouse_pos = event.pos
 
                 if current_screen == 'main':
